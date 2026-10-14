@@ -3,14 +3,8 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: 'qlsv-app'
-    metrics_path: '/metrics'
+  - job_name: qlsv-app
+    metrics_path: /metrics
     static_configs:
-      - targets: ['app:3000']
-
-  - job_name: 'cadvisor'
-    static_configs:
-      - targets: ['cadvisor:8080']
-```[cite: 6]
-
-*(Lưu ý: Để job `cadvisor` hoạt động, hãy nhớ thêm service `cadvisor` vào file `docker-compose.yml` của bạn)*[cite: 6].
+      - targets: ["app:3000"]
+  
