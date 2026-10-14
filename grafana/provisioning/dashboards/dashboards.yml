@@ -1,0 +1,9 @@
+apiVersion: 1
+providers:
+  - name: QLSV
+    orgId: 1
+    folder: QLSV
+    type: file
+    disableDeletion: true
+    options:
+      path: /var/lib/grafana/dashboards

@@ -1,0 +1,155 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-qlsv}
+      MYSQL_USER: ${MYSQL_USER:-qlsv_app}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/10-schema.sql:ro
+      - ./seed.sql:/docker-entrypoint-initdb.d/20-seed.sql:ro
+    networks: [data-net]
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    security_opt: [no-new-privileges:true]
+
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${MYSQL_DATABASE:-qlsv}
+      DB_USER: ${MYSQL_USER:-qlsv_app}
+      DB_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:?Set ADMIN_PASSWORD_HASH in .env}
+      SESSION_SECRET: ${SESSION_SECRET:?Set SESSION_SECRET in .env}
+      SESSION_TTL_SECONDS: ${SESSION_TTL_SECONDS:-14400}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      LOG_FILE: /var/log/qlsv/app.log
+    depends_on:
+      db: { condition: service_healthy }
+    networks: [data-net, app-net, observability-net]
+    volumes:
+      - app_logs:/var/log/qlsv
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    logging: *default-logging
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports: ["8088:8080"]
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    user: "101:101"
+    entrypoint: ["nginx"]
+    command: ["-g", "daemon off;"]
+    depends_on: [app]
+    networks: [edge-net, app-net]
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:rw,noexec,nosuid,size=16m,uid=101,gid=101
+      - /tmp:rw,noexec,nosuid,size=8m,uid=101,gid=101
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    logging: *default-logging
+
+  phpmyadmin:
+    image: phpmyadmin:5.2-apache
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 16M
+    ports: ["127.0.0.1:8081:80"]
+    depends_on:
+      db: { condition: service_healthy }
+    networks: [data-net, management-net]
+    security_opt: [no-new-privileges:true]
+    logging: *default-logging
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    restart: unless-stopped
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus", "--web.enable-lifecycle"]
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports: ["127.0.0.1:9090:9090"]
+    networks: [app-net, observability-net, management-net]
+    security_opt: [no-new-privileges:true]
+    logging: *default-logging
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD in .env}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports: ["127.0.0.1:3002:3000"]
+    networks: [observability-net, management-net]
+    security_opt: [no-new-privileges:true]
+    logging: *default-logging
+
+  loki:
+    image: grafana/loki:3.3.2
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/loki-config.yaml"]
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - loki_data:/loki
+    networks: [observability-net]
+    security_opt: [no-new-privileges:true]
+    logging: *default-logging
+
+  promtail:
+    image: grafana/promtail:3.3.2
+    restart: unless-stopped
+    command: ["-config.file=/etc/promtail/promtail-config.yaml"]
+    volumes:
+      - ./loki/promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
+      - app_logs:/var/log/qlsv:ro
+      - promtail_positions:/tmp
+    networks: [observability-net]
+    depends_on: [loki]
+    security_opt: [no-new-privileges:true]
+    logging: *default-logging
+
+networks:
+  edge-net: {}
+  app-net: { internal: true }
+  data-net: { internal: true }
+  observability-net: { internal: true }
+  management-net: {}
+
+volumes:
+  mysql_data: {}
+  app_logs: {}
+  prometheus_data: {}
+  grafana_data: {}
+  loki_data: {}
+  promtail_positions: {}

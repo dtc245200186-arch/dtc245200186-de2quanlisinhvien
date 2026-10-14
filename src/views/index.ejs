@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#19214e"><title><%= title %> | EduCore Manager</title><link rel="stylesheet" href="/app.css"><link rel="stylesheet" href="/edu.css"></head>
+<body class="app-shell">
+<aside class="sidebar" id="sidebar">
+  <a class="brand" href="/dashboard"><span class="brand-mark">E</span><span><strong>EduCore</strong><small>ACADEMIC MANAGER</small></span></a>
+  <div class="nav-caption">WORKSPACE</div>
+  <nav class="primary-nav" aria-label="Điều hướng chính">
+    <button class="nav-link active" data-view="overview"><span class="nav-icon">◫</span><span>Tổng quan</span></button>
+    <button class="nav-link" data-view="students"><span class="nav-icon">♙</span><span>Sinh viên</span><span class="nav-count" id="nav-student-count">—</span></button>
+    <button class="nav-link" data-view="classes"><span class="nav-icon">▦</span><span>Lớp học</span></button>
+    <button class="nav-link" data-view="grades"><span class="nav-icon">◉</span><span>Điểm số</span></button>
+    <button class="nav-link" data-view="reports"><span class="nav-icon">▥</span><span>Báo cáo</span></button>
+  </nav>
+  <div class="nav-caption nav-caption-lower">ADMINISTRATION</div>
+  <nav class="primary-nav">
+    <button class="nav-link" data-view="settings"><span class="nav-icon">⚙</span><span>Cài đặt hệ thống</span></button>
+    <button class="nav-link" data-view="help"><span class="nav-icon">?</span><span>Trợ giúp & hướng dẫn</span></button>
+  </nav>
+  <button class="sidebar-help" data-view="help"><span class="help-bubble">?</span><span><strong>Cần hỗ trợ?</strong><small>Xem cách sử dụng EduCore</small></span><b>→</b></button>
+  <div class="sidebar-spacer"></div>
+  <div class="sidebar-status"><span class="pulse-dot"></span><span><strong>Hệ thống ổn định</strong><small>Kết nối cơ sở dữ liệu tốt</small></span></div>
+  <form action="/logout" method="post" class="logout-form"><button class="nav-link logout-link" type="submit"><span class="nav-icon">⇥</span><span>Đăng xuất</span></button></form>
+  <div class="sidebar-foot">EDUCORE MANAGER <span>v1.0</span></div>
+</aside>
+<main class="main-area">
+  <header class="topbar">
+    <button class="mobile-menu" id="mobile-menu" aria-label="Mở menu">☰</button>
+    <div class="breadcrumb"><span>EduCore</span><b>/</b><strong id="breadcrumb-current">Tổng quan</strong></div>
+    <div class="topbar-actions">
+      <label class="global-search"><span>⌕</span><input id="global-search" type="search" placeholder="Tìm sinh viên, mã số..." aria-label="Tìm kiếm toàn hệ thống"><kbd>⌘ K</kbd></label>
+      <button class="icon-button notification-button" id="notification-button" aria-label="Thông báo">♧<i></i></button>
+      <div class="account-wrap"><button class="account-button" id="account-button"><span class="avatar avatar-admin">AD</span><span class="account-copy"><strong>Quản trị viên</strong><small><%= adminUser %></small></span><span class="chevron">⌄</span></button><div class="account-menu" id="account-menu"><button data-view="settings">Cài đặt hệ thống</button><form action="/logout" method="post"><button type="submit">Đăng xuất</button></form></div></div>
+    </div>
+  </header>
+  <div class="content-wrap">
+    <section class="page-view" id="view-overview">
+      <div class="welcome-row"><div><div class="eyebrow"><span class="pulse-dot"></span> <span id="today-weekday"></span> · <span id="today-date"></span></div><h1>Chào mừng trở lại, Admin <span class="wave">✦</span></h1><p class="page-subtitle">Đây là tình hình tổng quan của trung tâm đào tạo hôm nay.</p></div><button class="button button-primary" data-action="add-student"><span>＋</span> Thêm sinh viên</button></div>
+      <div class="stat-grid">
+        <article class="stat-card"><div class="stat-top"><span>Tổng sinh viên</span><span class="stat-icon icon-violet">♙</span></div><div class="stat-value" id="stat-students">—</div><div class="stat-foot"><span class="trend-positive">● Đang theo dõi</span><span>toàn hệ thống</span></div><div class="sparkline spark-violet"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></article>
+        <article class="stat-card"><div class="stat-top"><span>Lớp đang hoạt động</span><span class="stat-icon icon-blue">▦</span></div><div class="stat-value" id="stat-classes">—</div><div class="stat-foot"><span class="trend-positive">● Đang mở</span><span>lớp học</span></div><div class="sparkline spark-blue"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></article>
+        <article class="stat-card"><div class="stat-top"><span>Điểm trung bình</span><span class="stat-icon icon-amber">★</span></div><div class="stat-value"><span id="stat-average">—</span><small class="value-out-of">/ 10</small></div><div class="stat-foot"><span class="trend-neutral" id="stat-reserved">—</span><span>sinh viên bảo lưu</span></div><div class="sparkline spark-amber"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></article>
+      </div>
+      <div class="overview-grid">
+        <section class="surface recent-surface"><div class="section-heading"><div><h2>Sinh viên mới cập nhật</h2><p>Danh sách hồ sơ được thêm gần đây</p></div><button class="text-button" data-view="students">Xem tất cả <span>→</span></button></div><div class="table-wrap"><table class="data-table compact-table"><thead><tr><th>Sinh viên</th><th>Mã sinh viên</th><th>Ngày tạo</th><th>Trạng thái</th></tr></thead><tbody id="recent-students"><tr><td colspan="4" class="loading-cell">Đang tải dữ liệu…</td></tr></tbody></table></div></section>
+        <section class="surface quick-surface"><div class="section-heading"><div><h2>Truy cập nhanh</h2><p>Thao tác thường dùng</p></div></div><div class="quick-links"><button data-action="add-student"><span class="quick-icon quick-purple">＋</span><span><strong>Thêm sinh viên</strong><small>Tạo hồ sơ mới</small></span><b>→</b></button><button data-action="add-class"><span class="quick-icon quick-blue">▦</span><span><strong>Tạo lớp học</strong><small>Mở lớp đào tạo</small></span><b>→</b></button><button data-action="add-grade"><span class="quick-icon quick-orange">★</span><span><strong>Nhập điểm số</strong><small>Cập nhật kết quả</small></span><b>→</b></button></div></section>
+      </div>
+      <section class="surface insight-strip"><span class="insight-mark">✦</span><div><strong>Thông tin hệ thống</strong><p>EduCore đang đồng bộ dữ liệu trực tiếp với cơ sở dữ liệu đào tạo.</p></div><button class="text-button" data-view="settings">Chi tiết hệ thống →</button></section>
+    </section>
+
+    <section class="page-view hidden" id="view-students">
+      <div class="page-heading"><div><div class="eyebrow">QUẢN LÝ ĐÀO TẠO / HỒ SƠ</div><h1>Quản lý sinh viên</h1><p class="page-subtitle">Theo dõi hồ sơ, lớp học và kết quả học tập của sinh viên.</p></div><button class="button button-primary" data-action="add-student"><span>＋</span> Thêm sinh viên</button></div>
+      <div class="stat-grid mini-stats"><article class="mini-stat"><span>Tổng hồ sơ</span><strong id="student-total">—</strong><small>tất cả sinh viên</small></article><article class="mini-stat"><span>Đang học</span><strong id="student-active">—</strong><small>đang theo học</small></article><article class="mini-stat"><span>Bảo lưu</span><strong id="student-reserved">—</strong><small>tạm dừng học</small></article></div>
+      <section class="surface table-surface"><div class="toolbar"><label class="table-search"><span>⌕</span><input id="student-search" type="search" placeholder="Tìm theo tên, mã sinh viên hoặc email..."></label><select id="student-class-filter" aria-label="Lọc theo lớp"><option value="">Tất cả lớp học</option></select><select id="student-status-filter" aria-label="Lọc trạng thái"><option value="">Mọi trạng thái</option><option value="studying">Đang học</option><option value="reserved">Bảo lưu</option></select><button class="button button-light" id="refresh-students">↻ <span>Làm mới</span></button></div>
+        <div class="table-wrap"><table class="data-table student-table"><thead><tr><th class="check-col"><input type="checkbox" id="select-all" aria-label="Chọn tất cả"></th><th>Thông tin sinh viên</th><th>Mã sinh viên</th><th>Lớp / Chuyên ngành</th><th>Điểm trung bình</th><th>Trạng thái</th><th></th></tr></thead><tbody id="students-body"><tr><td colspan="7" class="loading-cell">Đang tải dữ liệu…</td></tr></tbody></table></div>
+        <div class="table-footer"><span id="student-range">Đang tải…</span><div class="pagination"><button id="page-prev" aria-label="Trang trước">←</button><span id="page-label">1 / 1</span><button id="page-next" aria-label="Trang sau">→</button></div></div>
+      </section>
+    </section>
+
+    <section class="page-view hidden" id="view-classes">
+      <div class="page-heading"><div><div class="eyebrow">QUẢN LÝ ĐÀO TẠO / TỔ CHỨC</div><h1>Lớp học</h1><p class="page-subtitle">Quản lý lớp và chuyên ngành đào tạo.</p></div><button class="button button-primary" data-action="add-class"><span>＋</span> Tạo lớp học</button></div>
+      <div class="class-grid" id="classes-grid"><div class="surface loading-cell">Đang tải danh sách lớp…</div></div>
+    </section>
+
+    <section class="page-view hidden" id="view-grades">
+      <div class="page-heading"><div><div class="eyebrow">QUẢN LÝ ĐÀO TẠO / KẾT QUẢ</div><h1>Điểm số</h1><p class="page-subtitle">Theo dõi và cập nhật kết quả học tập theo môn.</p></div><button class="button button-primary" data-action="add-grade"><span>＋</span> Nhập điểm</button></div>
+      <div class="semester-summary"><article class="semester-card semester-one" data-semester="1" aria-label="Xem điểm học kỳ 1"><span class="semester-icon">Ⅰ</span><div><small>HỌC KỲ 1</small><strong id="semester-one-average">—</strong><span>Điểm trung bình</span></div><b id="semester-one-count">0 đầu điểm</b></article><article class="semester-card semester-two" data-semester="2" aria-label="Xem điểm học kỳ 2"><span class="semester-icon">Ⅱ</span><div><small>HỌC KỲ 2</small><strong id="semester-two-average">—</strong><span>Điểm trung bình</span></div><b id="semester-two-count">0 đầu điểm</b></article></div>
+      <section class="surface table-surface"><div class="grade-toolbar"><div class="semester-tabs" role="tablist" aria-label="Lọc điểm theo học kỳ"><button class="semester-tab active" data-semester="1">Học kỳ 1</button><button class="semester-tab" data-semester="2">Học kỳ 2</button><button class="semester-tab" data-semester="all">Tất cả kỳ</button></div><label class="table-search"><span>⌕</span><input id="grade-search" type="search" placeholder="Tìm sinh viên hoặc môn học..."></label></div><div class="grade-help"><span>ⓘ</span><p>Mỗi đầu điểm thuộc một học kỳ. Dùng nút <strong>Học kỳ 1</strong> hoặc <strong>Học kỳ 2</strong> để xem riêng kết quả; dữ liệu cũ được xếp vào kỳ 1.</p></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Sinh viên</th><th>Môn học</th><th>Học kỳ</th><th>Điểm</th><th>Đánh giá</th><th></th></tr></thead><tbody id="grades-body"><tr><td colspan="6" class="loading-cell">Đang tải dữ liệu…</td></tr></tbody></table></div><div class="table-footer"><span id="grade-range">Đang tải điểm…</span><span class="term-footnote">Điểm được lưu theo từng học kỳ</span></div></section>
+    </section>
+
+    <section class="page-view hidden" id="view-reports">
+      <div class="page-heading"><div><div class="eyebrow">PHÂN TÍCH DỮ LIỆU</div><h1>Báo cáo học tập</h1><p class="page-subtitle">Tổng hợp kết quả điểm số hiện có trong hệ thống.</p></div><span class="report-date" id="report-date"></span></div>
+      <div class="report-semesters" id="grade-distribution"><section class="surface report-surface"><div class="section-heading"><div><h2>Học kỳ 1</h2><p>Phân bố kết quả theo thang điểm 10</p></div></div><div class="distribution-list" data-report-semester="1"></div></section><section class="surface report-surface"><div class="section-heading"><div><h2>Học kỳ 2</h2><p>Phân bố kết quả theo thang điểm 10</p></div></div><div class="distribution-list" data-report-semester="2"></div></section></div>
+      <section class="surface insight-strip report-note"><span class="insight-mark">i</span><div><strong>Cách đọc báo cáo</strong><p>Điểm giỏi từ 8.5; khá từ 7.0; trung bình từ 5.0. Dữ liệu được tổng hợp trực tiếp từ bảng điểm.</p></div></section>
+    </section>
+
+    <section class="page-view hidden" id="view-help">
+      <div class="page-heading"><div><div class="eyebrow">TRUNG TÂM HỖ TRỢ EDUCORE</div><h1>Trợ giúp & hướng dẫn</h1><p class="page-subtitle">Hướng dẫn nhanh để bạn bắt đầu và xử lý các thao tác thường gặp.</p></div><span class="help-hero-icon">✦</span></div>
+      <div class="help-steps"><article class="help-step"><span class="step-number step-purple">01</span><div><h2>Thêm sinh viên</h2><p>Vào mục <strong>Sinh viên</strong>, chọn <strong>Thêm sinh viên</strong>, nhập mã, họ tên và chọn lớp. Mã sinh viên không được trùng.</p><button class="text-button" data-view="students">Mở danh sách sinh viên →</button></div></article><article class="help-step"><span class="step-number step-blue">02</span><div><h2>Ghi điểm theo học kỳ</h2><p>Chọn <strong>Điểm số → Nhập điểm</strong>, chọn sinh viên, môn học, kỳ 1 hoặc kỳ 2 rồi nhập điểm từ 0 đến 10.</p><button class="text-button" data-action="add-grade">Nhập điểm ngay →</button></div></article><article class="help-step"><span class="step-number step-orange">03</span><div><h2>Tìm và lọc dữ liệu</h2><p>Dùng ô tìm kiếm để tìm theo tên, mã hoặc email. Bộ lọc cho phép thu hẹp theo lớp, trạng thái và học kỳ.</p><button class="text-button" data-view="students">Thử tìm sinh viên →</button></div></article></div>
+      <section class="surface faq-surface"><div class="section-heading"><div><h2>Câu hỏi thường gặp</h2><p>Thông tin giúp bạn thao tác chính xác</p></div></div><details><summary>Điểm học kỳ 1 và học kỳ 2 khác nhau thế nào?</summary><p>Mỗi bản ghi điểm được gắn với một học kỳ. Trang Điểm số có các nút lọc theo kỳ; báo cáo cũng tách biểu đồ kết quả cho từng kỳ. Dữ liệu được tạo trước khi có trường học kỳ tự động xếp vào kỳ 1.</p></details><details><summary>Tôi không thấy sinh viên trong danh sách chọn điểm?</summary><p>Hãy tạo hồ sơ sinh viên trước. Nếu danh sách đang được lọc, chọn “Tất cả lớp học” và “Mọi trạng thái”, sau đó bấm Làm mới.</p></details><details><summary>Điểm nhập vào bị từ chối?</summary><p>Điểm phải là số từ 0 đến 10. Hãy chọn đúng sinh viên, môn học và học kỳ trước khi lưu.</p></details><details><summary>Phiên đăng nhập hết hạn thì làm sao?</summary><p>Đăng nhập lại bằng tài khoản quản trị. Phiên tự hết hạn sau 4 giờ; nút Đăng xuất nằm cuối thanh menu bên trái.</p></details></section>
+      <section class="help-contact"><span class="help-bubble">?</span><div><strong>Vẫn cần trợ giúp?</strong><p>Liên hệ quản trị viên hệ thống hoặc giảng viên phụ trách để được hỗ trợ.</p></div><span class="help-contact-tag">HỖ TRỢ QUẢN TRỊ</span></section>
+    </section>
+
+    <section class="page-view hidden" id="view-settings">
+      <div class="page-heading"><div><div class="eyebrow">QUẢN TRỊ / CẤU HÌNH</div><h1>Cài đặt hệ thống</h1><p class="page-subtitle">Trạng thái ứng dụng và thông tin phiên quản trị.</p></div></div>
+      <section class="surface settings-card"><div class="section-heading"><div><h2>Trạng thái dịch vụ</h2><p>Kết nối cập nhật theo phiên làm việc</p></div><span class="status-pill status-studying"><i></i> Hoạt động</span></div><div class="system-grid" id="system-info"><div class="system-item"><span>Ứng dụng</span><strong>EduCore Manager</strong></div><div class="system-item"><span>Cơ sở dữ liệu</span><strong>Đang kiểm tra…</strong></div><div class="system-item"><span>Phiên quản trị</span><strong><%= adminUser %></strong></div><div class="system-item"><span>Thời gian hoạt động</span><strong>—</strong></div></div></section>
+      <section class="surface settings-card"><div class="section-heading"><div><h2>Quan sát hệ thống</h2><p>Các dịch vụ monitoring đang được provision qua Docker Compose.</p></div></div><div class="settings-links"><a href="/metrics" target="_blank" rel="noreferrer"><span class="quick-icon quick-purple">⌁</span><span><strong>Metrics ứng dụng</strong><small>Mở endpoint Prometheus</small></span><b>↗</b></a><a href="http://localhost:9090" target="_blank" rel="noreferrer"><span class="quick-icon quick-blue">◷</span><span><strong>Prometheus</strong><small>Targets và truy vấn metrics</small></span><b>↗</b></a><a href="http://localhost:3002" target="_blank" rel="noreferrer"><span class="quick-icon quick-orange">▤</span><span><strong>Grafana</strong><small>Dashboard và log Explore</small></span><b>↗</b></a></div></section>
+    </section>
+    <footer class="app-footer"><span>© 2026 EduCore Manager</span><span><i class="pulse-dot"></i> Tất cả dịch vụ đang hoạt động</span><span>Hỗ trợ quản trị đào tạo</span></footer>
+  </div>
+</main>
+<div class="modal-backdrop hidden" id="modal-backdrop"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-head"><div><div class="eyebrow">EDUCORE MANAGER</div><h2 id="modal-title">Cập nhật thông tin</h2></div><button class="modal-close" id="modal-close" aria-label="Đóng">×</button></div><form id="editor-form"><div id="modal-fields" class="modal-fields"></div><div class="modal-actions"><button type="button" class="button button-light" id="modal-cancel">Hủy</button><button class="button button-primary" id="modal-submit">Lưu thông tin</button></div></form></section></div>
+<div class="toast hidden" id="toast" role="status"></div>
+<script src="/app.js" defer></script></body></html>
